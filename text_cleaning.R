@@ -25,6 +25,7 @@ kindle_reviews<- kindle_reviews %>%
 set.seed(123)
 kindle_reviews<-sample_n(kindle_reviews,1000)
 
+# create corpus
 review_corpus<- VCorpus(DataframeSource(kindle_reviews))
 ## Step 1: Eliminating extra whitespace
 review_corpus<- tm_map(review_corpus, stripWhitespace)
@@ -50,11 +51,11 @@ review_corpus<- tm_map(review_corpus, removeWords, stopwords("english"))
 #mystopwords<- c(stopwords("english"),"book","people")
 #review_corpus<- tm_map(review_corpus, removeWords, mystopwords
 #review_corpus<- tm_map(review_corpus, stripWhitespace)
-inspect(review_corpus[1:4])
+
 library(textstem)
 review_corpus<- tm_map(review_corpus, PlainTextDocument)
 review_corpus<- tm_map(review_corpus, content_transformer(lemmatize_words))
-inspect(review_corpus[1:4])
+
 # create term document matrix
 tdm<- TermDocumentMatrix(review_corpus, control = list(wordlengths = c(1,Inf)))
 # inspect frequent words
@@ -71,7 +72,6 @@ df_plot<- df %>%
   top_n(25)
 # Plot word frequency
 ggplot(df_plot, aes(x = reorder(term, +freq), y = freq, fill = freq)) + geom_bar(stat = "identity")+ scale_colour_gradientn(colors = terrain.colors(10))+ xlab("Terms")+ ylab("Count")+coord_flip()
-word_freq<- sort(rowSums(m), decreasing = T)
 # create word cloud
 install.packages("wordcloud2")
 library(wordcloud2)
