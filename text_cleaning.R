@@ -1,6 +1,6 @@
 # Load packages
 
-install.packages("tm")
+
 library(googledrive)
 library(data.table)
 library(dplyr)
@@ -9,6 +9,10 @@ library(tidytext)
 library(tokenizers)
 library(wordcloud)
 library(textstem)
+library(ggplot2)
+library(wordcloud2)
+
+
 
 # Load data
 drive_deauth()
@@ -52,9 +56,11 @@ review_corpus<- tm_map(review_corpus, removeWords, stopwords("english"))
 #review_corpus<- tm_map(review_corpus, removeWords, mystopwords
 #review_corpus<- tm_map(review_corpus, stripWhitespace)
 
-library(textstem)
-review_corpus<- tm_map(review_corpus, PlainTextDocument)
-review_corpus<- tm_map(review_corpus, content_transformer(lemmatize_words))
+# Lemmatize the words in the review_corpus
+
+review_corpus <- tm_map(review_corpus, lemmatize_strings)
+review_corpus<- tm_map(review_corpus, PlainTextDocument) #The PlainTextDocument function is used to convert each document in the corpus into a plain text format, which means stripping away any additional metadata and storing just the raw text content
+
 
 # create term document matrix
 tdm<- TermDocumentMatrix(review_corpus, control = list(wordlengths = c(1,Inf)))
@@ -67,16 +73,16 @@ df<- data.frame(term = names(term_freq), freq = term_freq)
 
 View(df)
 # plot word frequency
-library(ggplot2)
 df_plot<- df %>%
   top_n(25)
 # Plot word frequency
 ggplot(df_plot, aes(x = reorder(term, +freq), y = freq, fill = freq)) + geom_bar(stat = "identity")+ scale_colour_gradientn(colors = terrain.colors(10))+ xlab("Terms")+ ylab("Count")+coord_flip()
 # create word cloud
-install.packages("wordcloud2")
-library(wordcloud2)
 
 m<- as.matrix(tdm)
 # calculate the frequency of words as sort it by frequency
 word_freq<- sort(rowSums(m), decreasing = T)
 wordcloud2(df, color = "random-dark", backgroundColor = "white")
+
+
+
